@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "sfapi-cli"
+version = "0.1.0"
+description = ""
+authors = ["Nick Tyler <nicholas.s.tyler.4@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.scripts]
+sfapi = "sfapi-cli.sfapi:app"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+globus-sdk = "^3.29.0"
+sfapi-client = "^0.0.7"
+typer = "^0.9.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
