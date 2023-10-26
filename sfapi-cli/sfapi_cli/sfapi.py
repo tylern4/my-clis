@@ -40,22 +40,33 @@ def main(
 
 
 @app.command()
+def cat(
+    ctx: typer.Context,
+    path: str = typer.Option(None, "-p", "--path", help="Path at NERSC")
+):
+    [client, compute] = ctx.obj
+    [ret] = compute.ls(path)
+    with ret.open('r') as fl:
+        print(fl.read())
+
+
+@app.command()
 def hostname(ctx: typer.Context):
-    [client, commpute] = ctx.obj
-    ret = commpute.run("hostname")
+    [client, compute] = ctx.obj
+    ret = compute.run("hostname")
     print(ret)
 
 
 @app.command()
 def token(ctx: typer.Context):
-    [client, commpute] = ctx.obj
+    [client, compute] = ctx.obj
     print(client.token)
 
 
 @app.command()
 def status(ctx: typer.Context):
-    [client, commpute] = ctx.obj
-    print_json(commpute)
+    [client, compute] = ctx.obj
+    print_json(compute)
 
 
 @app.command()
@@ -63,11 +74,11 @@ def ls(
     ctx: typer.Context,
     path: str = typer.Option(None, "-p", "--path", help="Path at NERSC"),
 ):
-    [client, commpute] = ctx.obj
+    [client, compute] = ctx.obj
     if path is None:
         user = client.user()
         path = f"/global/homes/{user.name[0]}/{user.name}/"
-    ret = commpute.ls(path)
+    ret = compute.ls(path)
     print_json(ret)
 
 
@@ -79,8 +90,8 @@ def jobs(
     command: Optional[JobCommand] = typer.Option(
         "squeue", "-c", help="Command used to get job info"),
 ):
-    [client, commpute] = ctx.obj
-    ret = commpute.jobs(user=user, command=command)
+    [client, compute] = ctx.obj
+    ret = compute.jobs(user=user, command=command)
     print_json(ret)
 
 
@@ -93,8 +104,8 @@ def job(
         "sacct", "-c", help="Command used to get job info"
     ),
 ):
-    [client, commpute] = ctx.obj
-    ret = commpute.job(jobid=jobid, command=command)
+    [client, compute] = ctx.obj
+    ret = compute.job(jobid=jobid, command=command)
     print_json(ret)
 
 
@@ -105,14 +116,14 @@ def submit_job(
         ..., "--path", "-p", help="Path to slurm submit file at NERSC"
     ),
 ):
-    [client, commpute] = ctx.obj
-    remote_path = commpute.ls(path)
+    [client, compute] = ctx.obj
+    remote_path = compute.ls(path)
     if len(remote_path) == 0:
         print("Not found")
     elif len(remote_path) > 1:
         print("Is this dir")
     else:
-        ret = commpute.submit_job(path)
+        ret = compute.submit_job(path)
         print_json(ret)
 
 
@@ -121,9 +132,9 @@ def cancel_job(
     ctx: typer.Context,
     jobid: int = typer.Option(..., "--jobid", "-j", help="jobid to cancel"),
 ):
-    [client, commpute] = ctx.obj
+    [client, compute] = ctx.obj
     # Get job object
-    job = commpute.job(jobid=jobid, command=JobCommand.sacct)
+    job = compute.job(jobid=jobid, command=JobCommand.sacct)
     # Cancel job
     ret = job.cancel()
     print_json(ret)
